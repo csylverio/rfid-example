@@ -9,7 +9,6 @@ import com.zebra.rfid.api3.Readers
 import com.zebra.rfid.api3.RfidEventsListener
 import com.zebra.rfid.api3.RfidReadEvents
 import com.zebra.rfid.api3.RfidStatusEvents
-import com.zebra.rfid.api3.TagAccess
 
 class ZebraRfidHardware(private val context: Context) : RfidHardware, RfidEventsListener {
     private var readers: Readers? = null
@@ -105,13 +104,13 @@ class ZebraRfidHardware(private val context: Context) : RfidHardware, RfidEvents
         val tagAccess = reader?.Actions?.TagAccess ?: return
         try {
             Log.d(TAG, "writeEpc() tag=$tagId epc=$epc")
-            val params = tagAccess.WriteAccessParams()
-            params.setAccessPassword(0L)
-            params.setMemoryBank(MEMORY_BANK.MEMORY_BANK_EPC)
-            params.setOffset(2)
-            params.setWriteData(epc)
+            val writeAccessParams = tagAccess.WriteAccessParams()
+            writeAccessParams.setAccessPassword(0L)
+            writeAccessParams.setMemoryBank(MEMORY_BANK.MEMORY_BANK_EPC)
+            writeAccessParams.setOffset(2)
+            writeAccessParams.setWriteData(epc)
 
-            tagAccess.writeWait(tagId, params, null, null)
+            tagAccess.writeWait(tagId, writeAccessParams, null, null)
         } catch (e: Exception) {
             Log.w(TAG, "Falha ao escrever EPC: ${e.message}", e)
             throw e
