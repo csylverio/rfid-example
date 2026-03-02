@@ -101,14 +101,25 @@ class ZebraRfidHardware(private val context: Context) : RfidHardware, RfidEvents
     }
 
     override fun writeEpc(tagId: String, epc: String) {
+        require(epc.matches(Regex("^[0-9A-Fa-f]+$"))) { "EPC deve ser HEX" }
+        require(epc.length % 4 == 0) { "EPC deve ter tamanho múltiplo de 4 hex (1 word = 4 hex)" }
+
         val tagAccess = reader?.Actions?.TagAccess ?: return
+
         try {
             Log.d(TAG, "writeEpc() tag=$tagId epc=$epc")
-            val writeAccessParams = tagAccess.WriteAccessParams()
-            writeAccessParams.setAccessPassword(0L)
-            writeAccessParams.setMemoryBank(MEMORY_BANK.MEMORY_BANK_EPC)
-            writeAccessParams.setOffset(2)
-            writeAccessParams.setWriteData(epc)
+
+            val writeAccessParams = tagAccess.WriteAccessParams().apply {
+                setAccessPassword(0L)
+                setMemoryBank(MEMORY_BANK.MEMORY_BANK_EPC)
+                // Para escrever o EPC, normalmente começa no word offset 2 (pula CRC + PC)
+                setOffset(2)
+                setWriteData(epc.uppercase())
+                // Defini o tamanho do dado em "words" (4 hex = 1 word)
+                setWriteDataLength(epc.length / 4)
+                // opcional, mas recomendado
+                setWriteRetries(5)
+            }
 
             tagAccess.writeWait(tagId, writeAccessParams, null, null)
         } catch (e: Exception) {

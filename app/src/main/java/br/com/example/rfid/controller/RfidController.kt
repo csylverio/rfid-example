@@ -172,7 +172,9 @@ class RfidController(
 
             Log.d(TAG, "Codificando EPC: $epc")
 
+            Log.d(TAG, "Verifica se inventário está rodando isInventoryRunning: $isInventoryRunning")
             if (isInventoryRunning) {
+                Log.d(TAG, "Para processo de inventário")
                 stopInventoryInternal()
             }
 
@@ -184,7 +186,7 @@ class RfidController(
                 return@launch
             }
 
-            Log.d(TAG, "Escrevendo EPC na tag: $tagId")
+            Log.d(TAG, "Escrevendo EPC na tag Id: $tagId")
 
             try {
                 hardware.writeEpc(tagId, epc)
